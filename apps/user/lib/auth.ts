@@ -1,7 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@repo/db/client";
 import bcrypt from "bcrypt";
-
+import GoogleProvider from "next-auth/providers/google";
 export const authOptions = {
     providers: [
         CredentialsProvider({
@@ -34,7 +34,7 @@ export const authOptions = {
                     return { id: newUser.id.toString(), name: newUser.name, email: newUser.email, number: newUser.number };
                 } else if (mode === "login") {
                     // Handle login flow
-                    const existingUser = await prisma.user.findFirst({ where: { name: username } });
+                    const existingUser = await prisma.user.findFirst({ where: { email: email } });
                     if (!existingUser) throw new Error("No user found with this username");
 
                     const passwordMatch = await bcrypt.compare(password, existingUser.password);
@@ -46,5 +46,15 @@ export const authOptions = {
                 return null;
             },
         }),
+        GoogleProvider({
+            clientId : process.env.CLIENT_ID || "1061912437463-2316psdvd7p7pfmjeb6rkki3ql3jejhp.apps.googleusercontent.com",
+            clientSecret : process.env.CLIENT_SECRET || "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"
+        })
     ],
+    pages:{
+        signIn: "/login",
+    },
+    secret : "santhosh",
+    session : { strategy: "jwt" },
+    jwt : { secret: "santhosh" },
 };
